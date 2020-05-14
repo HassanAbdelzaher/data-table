@@ -15,7 +15,7 @@ import { EnhancedTableHead, HeadCell, Property } from './head';
 import DeleteDialog, { DeleteDialogResult } from './dialog';
 import { useTranslation } from 'react-i18next';
 import {DataTableCell} from './table-cell'
-
+import {DataTableRow} from './row'
 const columnsPerPage = [10, 20, 50, 100, 200];
 function descendingComparator(a: any, b: any, orderBy: Property | null) {
   if (orderBy == null) {
@@ -86,7 +86,8 @@ export interface DataTableProps<T> {
   onEdit?:(row:T)=>void
   onDelete?:(rows:T[])=>void
   onFilter?:()=>void
-  autoGenerateColumns?:boolean
+  autoGenerateColumns?:boolean,
+  onRowChange?:(row:any,col:HeadCell<T>)=>void
 }
 export const DataTable= function DataTable<T>(props: DataTableProps<T>) {
   const classes = useStyles();
@@ -202,13 +203,14 @@ export const DataTable= function DataTable<T>(props: DataTableProps<T>) {
               indexHeadCol={props.showIndex}
             />
             <TableBody>
+              <TableRow><TableCell>xcxcxc</TableCell></TableRow>
               {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const isItemSelected = isSelected(row);
                   const labelId = `enhanced-table-checkbox-${index}`;
                   return (
-                    <TableRow
+                    <DataTableRow
                       hover
                       onClick={(event) => handleClick(event, row)}
                       role="checkbox"
@@ -216,24 +218,12 @@ export const DataTable= function DataTable<T>(props: DataTableProps<T>) {
                       tabIndex={-1}
                       key={"r"+index}
                       selected={isItemSelected}
-                    >
-                      {
-                        props.showIndex && <TableCell padding="checkbox">
-                          {page * rowsPerPage+index+1}
-                        </TableCell>
-                      }
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ 'aria-labelledby': labelId }}
-                        />
-                      </TableCell>
-                      {
-                        (props.columns || []).map((col) => {
-                          return <DataTableCell val={row[col.id]} col={col} row={row} rows={rows} component="th" id={labelId} scope="row" padding="none"></DataTableCell>
-                        })
-                      }
-                    </TableRow>
+                      row={row}
+                      columns={columns}
+                      index={page * rowsPerPage+index+1}
+                      onRowChange={props.onRowChange}
+                    >                      
+                    </DataTableRow>
                   );
                 })}
 
